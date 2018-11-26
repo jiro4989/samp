@@ -1,5 +1,8 @@
 language: nim
 
+before:
+  - apt install -y nim
+
 script:
   - nimble test
   - nimble build
