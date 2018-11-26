@@ -1,0 +1,5 @@
+language: nim
+
+script:
+  - nimble test
+  - nimble build
