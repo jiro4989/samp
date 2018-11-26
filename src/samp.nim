@@ -1,8 +1,13 @@
 import algorithm, math
 
 proc parcentile*[T](x: open_array[T], n: int): float =
+  var m = n
   let v = x.sorted(cmp)
-  let k = (v.len+1) * n / 100
+  if m <= 0:
+    return v[0].float
+  if 100 <= m:
+    return v[v.len - 1].float
+  let k = (v.len+1) * m / 100
   let t = k.split_decimal
   let i = t.int_part.int
   let f = t.float_part

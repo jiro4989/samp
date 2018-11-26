@@ -6,7 +6,7 @@ suite "parcentile":
   test "50 parcentile (odd)":
     check(2 == @[3, 2, 1].parcentile(50))
   test "50 parcentile (even)":
-    check(5 == @[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].parcentile(50))
+    check(5.5 == @[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].parcentile(50))
   test "100 parcentile":
     check(3 == @[1, 2, 3].parcentile(100))
   test "if list length is 1 then no error":
@@ -24,4 +24,4 @@ suite "median":
   test "odd":
     check(2 == @[3, 2, 1].median)
   test "even":
-    check(2 == @[3, 4, 2, 1].median)
+    check(2.5 == @[3, 4, 2, 1].median)
