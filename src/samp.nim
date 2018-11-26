@@ -1,12 +1,12 @@
 import algorithm, math
 
-proc parcentile*[T](x: open_array[T], n: int): T =
-  var p = (x.len * n / 100).ceil.int - 1
-  if p < 0:
-    p = 0
-  if x.len - 1 < p:
-    p = x.len - 1
-  result = x.sorted(cmp)[p]
+proc parcentile*[T](x: open_array[T], n: int): float =
+  let v = x.sorted(cmp)
+  let k = (v.len+1) * n / 100
+  let t = k.split_decimal
+  let i = t.int_part.int
+  let f = t.float_part
+  result = v[i-1].float + f * (v[i] - v[i-1]).float
 
-proc median*[T](x: open_array[T]): T =
+proc median*[T](x: open_array[T]): float =
   result = x.parcentile(50)
