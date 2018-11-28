@@ -1,4 +1,4 @@
-import ../src/samp, unittest, lists
+import samp, unittest
 
 suite "parcentile":
   test "normal":
