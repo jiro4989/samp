@@ -9,3 +9,5 @@ Aggregate CLI command.
 ```bash
 seq 1 10 | samp
 ```
+
+test
