@@ -14,13 +14,14 @@ import algorithm, math, docopt
 let args = docopt(doc, version = "v1.0.0")
 echo args
 
-proc parcentile*[T](x: open_array[T], n: int): float =
-  var m = n
+proc parcentile*[T](x: open_array[T], m: int): float =
   let v = x.sorted(cmp)
   if m <= 0:
-    return v[0].float
+    result = v[0].float
+    return
   if 100 <= m:
-    return v[v.len - 1].float
+    result = v[v.len - 1].float
+    return
   let k = (v.len+1) * m / 100
   let t = k.split_decimal
   let i = t.int_part.int
