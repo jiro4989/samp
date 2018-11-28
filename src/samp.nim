@@ -1,4 +1,18 @@
-import algorithm, math
+const doc = """
+samp is Sum Average Median Parcentile
+
+usage:
+  samp [-h|--help]
+  samp [-v|--version]
+  samp [-c|--count]
+       [-n|--min]
+       [-x|--max]
+"""
+
+import algorithm, math, docopt
+
+let args = docopt(doc, version = "v1.0.0")
+echo args
 
 proc parcentile*[T](x: open_array[T], n: int): float =
   var m = n
