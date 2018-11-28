@@ -10,4 +10,3 @@ Aggregate CLI command.
 seq 1 10 | samp
 ```
 
-test
