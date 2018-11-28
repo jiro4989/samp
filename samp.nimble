@@ -8,6 +8,7 @@ license       = "MIT"
 # Dependencies
 
 requires "nim >= 0.17.2"
+requires "docopt >= 0.6.7"
 
 srcDir        = "src"                     # ソースフォルダ
 binDir        = "bin"                     # 実行モジュールを配置するフォルダ
