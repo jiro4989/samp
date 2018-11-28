@@ -7,12 +7,17 @@ usage:
   samp [-c|--count]
        [-n|--min]
        [-x|--max]
+       [-v|--average]
+       [-m|--median]
+       [-p|--parcentile]
 """
 
 import algorithm, math, docopt
 
 let args = docopt(doc, version = "v1.0.0")
-echo args
+if args["-h"] or args["--help"]:
+  echo args
+  quit 0
 
 proc parcentile*[T](x: open_array[T], m: int): float =
   let v = x.sorted(cmp)
