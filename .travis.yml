@@ -1,8 +1,9 @@
-language: nim
-
-before:
-  - apt install -y nim
-
+sudo: required
+services:
+  - docker
+before_install:
+  - docker pull nimlang/nim
 script:
-  - nimble test
-  - nimble build
+  - docker run nimlang/nim nim --version
+  - docker run -v "$(pwd):/project" -w /project nimlang/nim sh -c "nimble install -dy && nimble test"
+#  - docker run -v "$(pwd):/project" -w /project nimlang/nim sh -c "find src/ -name '*.nim' -type f -exec nim doc {} \;"
