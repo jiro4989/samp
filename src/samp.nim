@@ -45,6 +45,12 @@ proc parcentile*[T](x: openArray[T], m: int): float =
   let t = k.splitDecimal
   let i = t.intPart.int
   let f = t.floatPart
+  if i <= 0:
+    result = f * v[i].float
+    return
+  if v.len <= i:
+    result = v[i-1].float
+    return
   result = v[i-1].float + f * (v[i] - v[i-1]).float
 
 proc median*[T](x: openArray[T]): float =

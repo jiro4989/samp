@@ -5,9 +5,9 @@ suite "parcentile":
     check(1 == [1, 2, 3].parcentile(0))
     check(2 == [3, 2, 1].parcentile(50))
   test "細かい値":
-    check(0.5 == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].parcentile(5))
+    check(0.55 == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].parcentile(5))
     check(5.5 == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].parcentile(50))
-    check(9.5 == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].parcentile(95))
+    check(10 == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].parcentile(95))
     check(3 == [1, 2, 3].parcentile(100))
   test "元データ量が少ない場合":
     check(1 == [1].parcentile(0))
