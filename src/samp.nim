@@ -25,14 +25,14 @@ if isMainModule:
     # 標準入力を対象に処理
     var line = ""
     var lines: seq[string] = @[]
-    while stdin.readline line:
+    while stdin.readLine line:
       lines.add line
     echo lines
   else:
     # ファイルを対象に処理
     echo "file"
 
-proc parcentile*[T](x: open_array[T], m: int): float =
+proc parcentile*[T](x: openArray[T], m: int): float =
   let v = x.sorted(cmp)
   if m <= 0:
     result = v[0].float
@@ -41,10 +41,10 @@ proc parcentile*[T](x: open_array[T], m: int): float =
     result = v[v.len - 1].float
     return
   let k = (v.len+1) * m / 100
-  let t = k.split_decimal
-  let i = t.int_part.int
-  let f = t.float_part
+  let t = k.splitDecimal
+  let i = t.intPart.int
+  let f = t.floatPart
   result = v[i-1].float + f * (v[i] - v[i-1]).float
 
-proc median*[T](x: open_array[T]): float =
+proc median*[T](x: openArray[T]): float =
   result = x.parcentile(50)
