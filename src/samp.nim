@@ -12,6 +12,7 @@ options:
   -a --average      show average
   -m --median       show median
   -p --parcentile   show parcentile
+  -N --noheader     not show header
   -h --help         show this screen
   -v --version      show version
 """
