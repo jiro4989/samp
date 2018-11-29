@@ -18,19 +18,20 @@ options:
 
 import algorithm, math, docopt
 
-let args = docopt(doc, version = "v1.0.0")
-let files = args["<filepath>"]
-if files.len < 1:
-  # 標準入力を対象に処理
-  var line = stdin.read_line
-  var lines: seq[string] = @[]
-  while line != "":
-    lines.add line
-    line = stdin.read_line
-  echo lines
-else:
-  # ファイルを対象に処理
-  echo "file"
+if isMainModule:
+  let args = docopt(doc, version = "v1.0.0")
+  let files = args["<filepath>"]
+  if files.len < 1:
+    # 標準入力を対象に処理
+    var line = stdin.read_line
+    var lines: seq[string] = @[]
+    while line != "":
+      lines.add line
+      line = stdin.read_line
+    echo lines
+  else:
+    # ファイルを対象に処理
+    echo "file"
 
 proc parcentile*[T](x: open_array[T], m: int): float =
   let v = x.sorted(cmp)
