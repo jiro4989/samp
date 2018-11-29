@@ -23,11 +23,10 @@ if isMainModule:
   let files = args["<filepath>"]
   if files.len < 1:
     # 標準入力を対象に処理
-    var line = stdin.read_line
+    var line = ""
     var lines: seq[string] = @[]
-    while line != "":
+    while stdin.readline line:
       lines.add line
-      line = stdin.read_line
     echo lines
   else:
     # ファイルを対象に処理
