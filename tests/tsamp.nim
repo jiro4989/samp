@@ -59,6 +59,14 @@ suite "processInput":
 suite "format":
   setup:
     let x = [CalcResult(fileName: testFile1, count: 100, min: 1.0, max: 100.0, sum: 5050.0, average: 50.5, median: 50.5, parcentile: 95.95)]
-  test "normal":
-    #check("100", x.format())
-    discard
+  test "only count":      check("100" == x.format(countFlag = true))
+  test "only min":        check("1.0" == x.format(minFlag = true))
+  test "only max":        check("100.0" == x.format(maxFlag = true))
+  test "only sum":        check("5050.0" == x.format(sumFlag = true))
+  test "only average":    check("50.5" == x.format(averageFlag = true))
+  test "only median":     check("50.5" == x.format(medianFlag = true))
+  test "only parcentile": check("95.95" == x.format(parcentileFlag = true))
+  test "all column":
+    check("100\t1.0\t100.0\t5050.0\t50.5\t50.5\t95.95" == x.format(countFlag = true, minFlag = true, maxFlag = true, sumFlag = true, averageFlag = true, medianFlag = true, parcentileFlag = true))
+  test "all column and show header":
+    check("count\tmin\tmax\tsum\taverage\tmedian\t95parcentile\n100\t1.0\t100.0\t5050.0\t50.5\t50.5\t95.95" == x.format(headerFlag = true, countFlag = true, minFlag = true, maxFlag = true, sumFlag = true, averageFlag = true, medianFlag = true, parcentileFlag = true))

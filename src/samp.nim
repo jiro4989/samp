@@ -11,10 +11,10 @@ options:
   -c --count                show count
   -n --min                  show minimum
   -x --max                  show maximum
+  -s --sum                  show sum
   -a --average              show average
   -m --median               show median
   -p --parcentile=<n>       show parcentile [default: 95]
-  -N --noheader             not show header
   -H --header               ヘッダを出力する
   -d --indelimiter=[d]      入力の区切り文字を指定 [default: "\t"]
   -D --outdelimiter=[d]     出力の区切り文字を指定 [default: "\t"]
@@ -100,9 +100,48 @@ proc processInput*(files: openArray[string], n: int): seq[CalcResult] =
           f.close
 
 
-proc format*(arr: openArray[CalcResult], args: Table[string, Value]): seq[string] =
+proc format*(arr: openArray[CalcResult],
+             noFileNameFlag: bool = false,
+             countFlag: bool = false,
+             minFlag: bool = false,
+             maxFlag: bool = false,
+             sumFlag: bool = false,
+             averageFlag: bool = false,
+             medianFlag: bool = false,
+             parcentileFlag: bool = false,
+             parcentileNum: int = 95,
+             headerFlag: bool = false,
+             outDelimiter: string = "\t"
+             ): string =
   ## format はオプション引数に応じた出力に加工して返す
-  result = @["test", "test"]
+  var
+    records: seq[string]
+    record: seq[string]
+  
+  # ヘッダレコードの追加
+  if headerFlag:
+    var header: seq[string]
+    if countFlag: header.add "count"
+    if minFlag: header.add "min"
+    if maxFlag: header.add "max"
+    if sumFlag: header.add "sum"
+    if averageFlag: header.add "average"
+    if medianFlag: header.add "median"
+    if parcentileFlag: header.add($parcentileNum & "parcentile")
+    records.add header.join(outDelimiter)
+
+  # 値レコードの追加
+  for v in arr:
+    if countFlag: record.add $(v.count)
+    if minFlag: record.add $(v.min)
+    if maxFlag: record.add $(v.max)
+    if sumFlag: record.add $(v.sum)
+    if averageFlag: record.add $(v.average)
+    if medianFlag: record.add $(v.median)
+    if parcentileFlag: record.add $(v.parcentile)
+    records.add record.join(outDelimiter)
+
+  result = records.join("\n")
 
 if isMainModule:
   var L = newConsoleLogger(fmtStr = verboseFmtStr)
