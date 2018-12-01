@@ -71,7 +71,13 @@ suite "format":
   test "only average":    check("50.5" == x.format(averageFlag = true))
   test "only median":     check("50.5" == x.format(medianFlag = true))
   test "only parcentile": check("95.95" == x.format(parcentileFlag = true))
+  test "only count and show header":
+    check("count\n100" == x.format(headerFlag = true, countFlag = true))
   test "all column":
     check("100\t1.0\t100.0\t5050.0\t50.5\t50.5\t95.95" == x.format(countFlag = true, minFlag = true, maxFlag = true, sumFlag = true, averageFlag = true, medianFlag = true, parcentileFlag = true))
   test "all column and show header":
     check("count\tmin\tmax\tsum\taverage\tmedian\t95parcentile\n100\t1.0\t100.0\t5050.0\t50.5\t50.5\t95.95" == x.format(headerFlag = true, countFlag = true, minFlag = true, maxFlag = true, sumFlag = true, averageFlag = true, medianFlag = true, parcentileFlag = true))
+  test "all column and change separator":
+    check("100,1.0,100.0,5050.0,50.5,50.5,95.95" == x.format(countFlag = true, minFlag = true, maxFlag = true, sumFlag = true, averageFlag = true, medianFlag = true, parcentileFlag = true, outDelimiter = ","))
+  test "all column and change separator and show header":
+    check("count,min,max,sum,average,median,95parcentile\n100,1.0,100.0,5050.0,50.5,50.5,95.95" == x.format(headerFlag = true, countFlag = true, minFlag = true, maxFlag = true, sumFlag = true, averageFlag = true, medianFlag = true, parcentileFlag = true, outDelimiter = ","))
