@@ -57,5 +57,8 @@ suite "processInput":
     check([x] == [testFile1, "hogefuga"].processInput(95))
 
 suite "format":
+  setup:
+    let x = [CalcResult(fileName: testFile1, count: 100, min: 1.0, max: 100.0, sum: 5050.0, average: 50.5, median: 50.5, parcentile: 95.95)]
   test "normal":
+    #check("100", x.format())
     discard
