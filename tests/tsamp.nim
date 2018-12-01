@@ -4,6 +4,7 @@ let
   zeroArray: seq[float] = @[]
   x10 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
   testFile1 = "tests/1_100.txt"
+  testFile2 = "tests/1_100_illegal.txt"
 
 suite "parcentile":
   test "normal":
@@ -36,6 +37,7 @@ suite "calc":
 suite "calcInput":
   setup:
     let f = testFile1.open FileMode.fmRead
+    let f2 = testFile2.open FileMode.fmRead
   teardown:
     f.close
   test "args is stdin":
@@ -43,6 +45,8 @@ suite "calcInput":
     discard
   test "args is file":
     check(CalcResult(count: 100, min: 1.0, max: 100.0, sum: 5050.0, average: 50.5, median: 50.5, parcentile: 95.95) == f.calcInput(95))
+  test "if data file has illegal value then handle error (no panic)":
+    check(CalcResult(count: 100, min: 1.0, max: 100.0, sum: 5050.0, average: 50.5, median: 50.5, parcentile: 95.95) == f2.calcInput(95))
 
 suite "processInput":
   setup:
