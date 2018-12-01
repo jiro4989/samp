@@ -157,28 +157,8 @@ proc initLogger(args: Table[string, Value]) =
 proc isTrueParam(args: Table[string, Value], key: string): bool =
   result = parseBool($args[key])
 
-if isMainModule:
-  let
-    args = docopt(doc, version = "v1.0.0")
-    files = @(args["<filepath>"])
-  initLogger args
-  debug "args:", args
-
-  # 引数を解析して計算結果を取得
-  var res: seq[CalcResult]
-  try:
-    res = files.processInput parseInt($args["--parcentile"])
-  except IOError:
-    let
-      msg = getCurrentExceptionMsg()
-      errMsg = &"ファイル読み込みに失敗: filePath={files}, error={msg}"
-    error errMsg
-    quit 1
-  debug "res:", res
-
-  # オプション引数に応じて出力結果を整形
-  # 特定のオプションの指定がない場合は全部trueにする
-  let outData = if args.isTrueParam("--count") or 
+proc validDefaultParamAndFormat(res: seq[CalcResult], args: Table[string, Value]): string =
+  result = if args.isTrueParam("--count") or 
       args.isTrueParam("--min") or 
       args.isTrueParam("--max") or 
       args.isTrueParam("--sum") or 
@@ -209,6 +189,29 @@ if isMainModule:
         parcentileNum = parseInt($args["--parcentile"]),
         headerFlag = parseBool($args["--header"]),
         outDelimiter = $($args["--outdelimiter"]).replace("\\t", "\t"))
+
+if isMainModule:
+  let
+    args = docopt(doc, version = "v1.0.0")
+    files = @(args["<filepath>"])
+  initLogger args
+  debug "args:", args
+
+  # 引数を解析して計算結果を取得
+  var res: seq[CalcResult]
+  try:
+    res = files.processInput parseInt($args["--parcentile"])
+  except IOError:
+    let
+      msg = getCurrentExceptionMsg()
+      errMsg = &"ファイル読み込みに失敗: filePath={files}, error={msg}"
+    error errMsg
+    quit 1
+  debug "res:", res
+
+  # オプション引数に応じて出力結果を整形
+  # 特定のオプションの指定がない場合は全部trueにする
+  let outData = res.validDefaultParamAndFormat(args)
   debug "outData:", outData
 
   # 出力先指定がなければ標準出力
