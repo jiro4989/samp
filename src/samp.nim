@@ -71,6 +71,24 @@ proc processInput*(files: openArray[string], parcentileNum: int, ignoreHeaderCou
       if f != nil:
         f.close
 
+proc processFieldFilePath*(ps: openArray[FieldFilePath], inDelimiter: string, parcentileNum: int, ignoreHeaderCount: int = 0): seq[CalcResult] =
+  for v in ps:
+    let i = v.fieldIndex
+    var f: File
+    try:
+      f = v.filePath.open FileMode.fmRead
+      let lines = f.readLines
+      var res = lines[ignoreHeaderCount..lines.len - 1]
+          .filterIt(i < it.split(inDelimiter).len)
+          .mapIt(it.split(inDelimiter)[i-1])
+          .mapIt(it.parseFloat)
+          .calc(parcentileNum)
+      res.fileName = v.filePath
+      result.add res
+    finally:
+      if f != nil:
+        f.close
+
 proc format*(arr: openArray[CalcResult],
              noFileNameFlag: bool = false,
              countFlag: bool = false,
@@ -114,15 +132,6 @@ proc format*(arr: openArray[CalcResult],
 
   result = records.join("\n")
 
-proc initLogger(args: Table[string, Value]) =
-  var lvl: logging.Level
-  if parseBool($args["--debug"]):
-    lvl = lvlAll
-  else:
-    lvl = lvlInfo
-  var L = newConsoleLogger(lvl, fmtStr = "$datetime [$levelname]$appname:")
-  addHandler(L)
-
 proc isTrueParam(args: Table[string, Value], key: string): bool =
   result = parseBool($args[key])
 
@@ -159,23 +168,14 @@ proc validDefaultParamAndFormat(res: seq[CalcResult], args: Table[string, Value]
         headerFlag = parseBool($args["--header"]),
         outDelimiter = $($args["--outdelimiter"]).replace("\\t", "\t"))
 
-proc processFieldFilePath*(ps: openArray[FieldFilePath], inDelimiter: string, parcentileNum: int, ignoreHeaderCount: int = 0): seq[CalcResult] =
-  for v in ps:
-    let i = v.fieldIndex
-    var f: File
-    try:
-      f = v.filePath.open FileMode.fmRead
-      let lines = f.readLines
-      var res = lines[ignoreHeaderCount..lines.len - 1]
-          .filterIt(i < it.split(inDelimiter).len)
-          .mapIt(it.split(inDelimiter)[i-1])
-          .mapIt(it.parseFloat)
-          .calc(parcentileNum)
-      res.fileName = v.filePath
-      result.add res
-    finally:
-      if f != nil:
-        f.close
+proc initLogger(args: Table[string, Value]) =
+  var lvl: logging.Level
+  if parseBool($args["--debug"]):
+    lvl = lvlAll
+  else:
+    lvl = lvlInfo
+  var L = newConsoleLogger(lvl, fmtStr = "$datetime [$levelname]$appname:")
+  addHandler(L)
 
 if isMainModule:
   let
