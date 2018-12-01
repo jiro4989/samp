@@ -63,17 +63,17 @@ proc processInput*(files: openArray[string], n: int): seq[CalcResult] =
   ## processInput はファイルがあればファイルを処理、なければ標準入力を処理
   if files.len < 1:
     result.add stdin.calcInput n
-  else:
-    for fp in files:
-      var f: File
-      try:
-        f = fp.open FileMode.fmRead
-        var ret = f.calcInput n
-        ret.fileName = fp
-        result.add ret
-      finally:
-        if f != nil:
-          f.close
+    return
+  for fp in files:
+    var f: File
+    try:
+      f = fp.open FileMode.fmRead
+      var ret = f.calcInput n
+      ret.fileName = fp
+      result.add ret
+    finally:
+      if f != nil:
+        f.close
 
 proc format*(arr: openArray[CalcResult],
              noFileNameFlag: bool = false,
