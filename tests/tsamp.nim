@@ -14,9 +14,12 @@ suite "calc":
 
 suite "calcInput":
   setup:
-    let f = testFile1.open FileMode.fmRead
-    let f2 = testFile2.open FileMode.fmRead
-    let f3 = testFile3.open FileMode.fmRead
+    let
+      f = testFile1.open FileMode.fmRead
+      f2 = testFile2.open FileMode.fmRead
+      f3 = testFile3.open FileMode.fmRead
+      res1 = CalcResult(count: 100, min: 1.0, max: 100.0, sum: 5050.0, average: 50.5, median: 50.5, parcentile: 95.95)
+      res2 = CalcResult(count: 99, min: 2.0, max: 100.0, sum: 5049.0, average: 51.0, median: 51.0, parcentile: 96.0)
   teardown:
     f.close
     f2.close
@@ -25,13 +28,17 @@ suite "calcInput":
     # TODO
     discard
   test "args is file":
-    check(CalcResult(count: 100, min: 1.0, max: 100.0, sum: 5050.0, average: 50.5, median: 50.5, parcentile: 95.95) == f.calcInput(95))
+    check(res1 == f.calcInput(95))
   test "ignore 1 header":
-    check(CalcResult(count: 99, min: 2.0, max: 100.0, sum: 5049.0, average: 51.0, median: 51.0, parcentile: 96.0) == f.calcInput(95, ignoreHeaderCount=1))
+    check(res2 == f.calcInput(95, ignoreHeaderCount=1))
   test "if data file has illegal value then handle error (no panic)":
-    check(CalcResult(count: 100, min: 1.0, max: 100.0, sum: 5050.0, average: 50.5, median: 50.5, parcentile: 95.95) == f2.calcInput(95))
+    check(res1 == f2.calcInput(95))
   test "ignore 2 header":
-    check(CalcResult(count: 99, min: 2.0, max: 100.0, sum: 5049.0, average: 51.0, median: 51.0, parcentile: 96.0) == f3.calcInput(95, ignoreHeaderCount=2))
+    check(res2 == f3.calcInput(95, ignoreHeaderCount=2))
+  test "ignore 0 == ignore -1":
+    check(res1 == f.calcInput(95, ignoreHeaderCount = -1))
+  test "0 == ignore 65535":
+    check(CalcResult(count: 1, min: 100.0, max: 100.0, sum: 100.0, average: 100.0, median: 100.0, parcentile: 100.0) == f3.calcInput(95, ignoreHeaderCount=65535))
 
 suite "processInput":
   setup:

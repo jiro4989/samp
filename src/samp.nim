@@ -49,8 +49,13 @@ proc calc*(x: openArray[float], parcentileNum: int): CalcResult =
 proc calcInput*(input: File, parcentileNum: int, ignoreHeaderCount: int = 0): CalcResult =
   ## calcInput はファイル、あるいは標準入力を計算して返す
   ## 不正なデータが混じっていた場合は warn を出力するが処理自体は継続する
+  var n = ignoreHeaderCount
   let lines = input.readLines
-  result = lines[ignoreHeaderCount..lines.len - 1]
+  if n < 0:
+    n = 0
+  if lines.len - 1 < n:
+    n = lines.len - 1
+  result = lines[n..lines.len - 1]
       .filterIt(it.contains(re"^-?[\d\.]+$"))
       .mapIt(it.parseFloat)
       .calc(parcentileNum)
