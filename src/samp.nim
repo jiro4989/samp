@@ -4,15 +4,25 @@ samp is Sum Average Median Parcentile
 usage:
   samp [options]
   samp [options] <filepath>...
+  samp [options] (-f <ff>)...
 
 options:
-  -c --count        show count
-  -n --min          show minimum
-  -x --max          show maximum
-  -a --average      show average
-  -m --median       show median
-  -p --parcentile   show parcentile
-  -N --noheader     not show header
+  -N, --nofilename          入力元ファイル名を出力しない
+  -c --count                show count
+  -n --min                  show minimum
+  -x --max                  show maximum
+  -a --average              show average
+  -m --median               show median
+  -p --parcentile=<n>       show parcentile [default: 95]
+  -N --noheader             not show header
+  -H, --header              ヘッダを出力する
+  -d, --indelimiter=[d]     入力の区切り文字を指定 [default: "\t"]
+  -D, --outdelimiter=[d]    出力の区切り文字を指定 [default: "\t"]
+  -o, --outfile=[f]         出力ファイルパス
+  -f, --fieldfilepath=[ff]  複数フィールド持つファイルと、その区切り位置指定 (ex: 1:data.csv)
+  -I, --ignoreheader=[n]    入力データヘッダを指定行無視する
+
+help options:
   -h --help         show this screen
   -v --version      show version
 """
