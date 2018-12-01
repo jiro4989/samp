@@ -145,22 +145,23 @@ proc format*(arr: openArray[CalcResult],
 
   result = records.join("\n")
 
-if isMainModule:
-  let
-    args = docopt(doc, version = "v1.0.0")
-    files = @(args["<filepath>"])
-
+proc initLogger(args: Table[string, Value]) =
   var lvl: logging.Level
   if parseBool($args["--debug"]):
     lvl = lvlAll
   else:
     lvl = lvlInfo
-
   var L = newConsoleLogger(lvl, fmtStr = "$datetime [$levelname]$appname:")
   addHandler(L)
 
+if isMainModule:
+  let
+    args = docopt(doc, version = "v1.0.0")
+    files = @(args["<filepath>"])
+  initLogger args
   debug "args:", args
 
+  # 引数を解析して計算結果を取得
   var res: seq[CalcResult]
   try:
     res = files.processInput parseInt($args["--parcentile"])
@@ -170,9 +171,9 @@ if isMainModule:
       errMsg = &"ファイル読み込みに失敗: filePath={files}, error={msg}"
     error errMsg
     quit 1
-
   debug "res:", res
 
+  # オプション引数に応じて出力結果を整形
   let outData = res.format(
       noFileNameFlag = parseBool($args["--nofilename"]),
       countFlag = parseBool($args["--count"]),
@@ -185,9 +186,10 @@ if isMainModule:
       parcentileNum = parseInt($args["--parcentile"]),
       headerFlag = parseBool($args["--header"]),
       outDelimiter = $($args["--outdelimiter"]).replace("\\t", "\t"))
-
   debug "outData:", outData
 
+  # 出力先指定がなければ標準出力
+  # あったらファイル出力
   if not args["--outfile"]:
     echo outData
     quit 0
