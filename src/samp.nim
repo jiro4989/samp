@@ -27,7 +27,7 @@ help options:
   -v --version      show version
 """
 
-import algorithm, math, docopt, strutils, os
+import algorithm, math, docopt, strutils, logging
 
 type CalcResult = object
   fileName: string
@@ -75,8 +75,27 @@ proc calcInput*(input: File): CalcResult =
     line = ""
   while input.readLine line:
     values.add(line.parseFloat)
-  defer: input.close
   result = values.calc
+
+proc processInput*(files: openArray[string]): seq[CalcResult] =
+  ## ファイルがあればファイルを処理、なければ標準入力を処理
+  if files.len < 1:
+    result.add stdin.calcInput
+  else:
+    for fp in files:
+      # f はprocessInput内でcloseする
+      var f: File
+      try:
+        f = fp.open FileMode.fmRead
+        var ret = f.calcInput
+        ret.fileName = fp
+        result.add ret
+      except IOError:
+        error getCurrentExceptionMsg()
+      finally:
+        if f != nil:
+          f.close
+
 
 proc format*(arr: openArray[CalcResult], args: Table[string, Value]): seq[string] =
   ## format はオプション引数に応じた出力に加工して返す
@@ -85,18 +104,7 @@ proc format*(arr: openArray[CalcResult], args: Table[string, Value]): seq[string
 if isMainModule:
   let
     args = docopt(doc, version = "v1.0.0")
-    files = args["<filepath>"]
-  var
-    rets: seq[CalcResult] = @[]
+    files = @(args["<filepath>"])
+    rets = files.processInput
 
-  # ファイルがあればファイルを処理、なければ標準入力を処理
-  if files.len < 1:
-    rets.add stdin.calcInput
-  else:
-    for fp in files:
-      let f = fp.open FileMode.fmRead
-      # f はprocessInput内でcloseする
-      var ret = f.calcInput
-      ret.fileName = fp
-      rets.add ret
   echo rets
