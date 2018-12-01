@@ -72,6 +72,7 @@ proc processInput*(files: openArray[string], parcentileNum: int, ignoreHeaderCou
         f.close
 
 proc processFieldFilePath*(ps: openArray[FieldFilePath], inDelimiter: string, parcentileNum: int, ignoreHeaderCount: int = 0): seq[CalcResult] =
+  ## processFieldFilePath はフィールド番号を指定してファイルを集計する
   for v in ps:
     let i = v.fieldIndex
     var f: File
@@ -133,9 +134,20 @@ proc format*(arr: openArray[CalcResult],
   result = records.join("\n")
 
 proc isTrueParam(args: Table[string, Value], key: string): bool =
+  ## isTrueParam はdocoptの引数がtrueかどうかを判定して返す
   result = parseBool($args[key])
 
 proc validDefaultParamAndFormat(res: seq[CalcResult], args: Table[string, Value]): string =
+  ## validDefaultParamAndFormat はdocoptの引数の特定の組み合わせの時にオプション引数をtrueにしてから計算する。
+  ## 以下のいずれもfalseの場合は、それらすべてをtrueに変更して計算する(デフォルト値)
+  ## - count
+  ## - min
+  ## - max
+  ## - sum
+  ## - average
+  ## - median
+  ## 目的としては wc コマンドみたいに指定しないときは出力するけれど
+  ## 一つでも指定したら指定したフィールドだけ出力するようにしたいため
   result = if args.isTrueParam("--count") or 
       args.isTrueParam("--min") or 
       args.isTrueParam("--max") or 
@@ -169,6 +181,8 @@ proc validDefaultParamAndFormat(res: seq[CalcResult], args: Table[string, Value]
         outDelimiter = $($args["--outdelimiter"]).replace("\\t", "\t"))
 
 proc initLogger(args: Table[string, Value]) =
+  ## initLoggerはロガーを初期化する
+  ## オプション引数に指定があれば全ログレベルを出力するフラグをたてる
   var lvl: logging.Level
   if parseBool($args["--debug"]):
     lvl = lvlAll
