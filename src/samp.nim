@@ -78,12 +78,11 @@ proc calcInput*(input: File): CalcResult =
   result = values.calc
 
 proc processInput*(files: openArray[string]): seq[CalcResult] =
-  ## ファイルがあればファイルを処理、なければ標準入力を処理
+  ## processInput はファイルがあればファイルを処理、なければ標準入力を処理
   if files.len < 1:
     result.add stdin.calcInput
   else:
     for fp in files:
-      # f はprocessInput内でcloseする
       var f: File
       try:
         f = fp.open FileMode.fmRead
@@ -102,9 +101,13 @@ proc format*(arr: openArray[CalcResult], args: Table[string, Value]): seq[string
   result = @["test", "test"]
 
 if isMainModule:
+  var L = newConsoleLogger(fmtStr = verboseFmtStr)
+  addHandler(L)
+
   let
     args = docopt(doc, version = "v1.0.0")
     files = @(args["<filepath>"])
     rets = files.processInput
-
-  echo rets
+  
+  debug "args:", args
+  debug rets
