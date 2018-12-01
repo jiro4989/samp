@@ -30,6 +30,7 @@ type CalcResult = object
   parcentile: float
 
 proc parcentile*[T](x: openArray[T], m: int): float =
+  ## parcentile はパーセンタイル値を計算して返す
   let v = x.sorted(cmp)
   if m <= 0:
     result = v[0].float
@@ -50,9 +51,11 @@ proc parcentile*[T](x: openArray[T], m: int): float =
   result = v[i-1].float + f * (v[i] - v[i-1]).float
 
 proc median*[T](x: openArray[T]): float =
+  ## median は中央値を計算して返す
   result = x.parcentile(50)
   
 proc calc*(x: openArray[float]): CalcResult =
+  ## calc は件数、最小値、最大値、合計値、平均値、中央値、パーセンタイル値を計算する
   result = CalcResult(count: x.len, min: x.min, max: x.max, sum: x.sum, average: x.sum / x.len.toFloat, median: x.median, parcentile: x.parcentile(95))
 
 if isMainModule:
