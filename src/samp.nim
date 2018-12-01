@@ -46,7 +46,7 @@ proc calc*(x: openArray[float], parcentileNum: int): CalcResult =
   ## calc は件数、最小値、最大値、合計値、平均値、中央値、パーセンタイル値を計算する
   result = CalcResult(count: x.len, min: x.min, max: x.max, sum: x.sum, average: x.sum / x.len.toFloat, median: x.median, parcentile: x.parcentile(parcentileNum))
 
-proc calcInput*(input: File, n: int): CalcResult =
+proc calcInput*(input: File, parcentileNum: int): CalcResult =
   ## calcInput はファイル、あるいは標準入力を計算して返す
   ## 不正なデータが混じっていた場合は warn を出力するが処理自体は継続する
   var
@@ -57,7 +57,7 @@ proc calcInput*(input: File, n: int): CalcResult =
       values.add(line.parseFloat)
     except ValueError:
       warn getCurrentExceptionMsg()
-  result = values.calc n
+  result = values.calc parcentileNum
 
 proc processInput*(files: openArray[string], n: int): seq[CalcResult] =
   ## processInput はファイルがあればファイルを処理、なければ標準入力を処理
