@@ -1,13 +1,16 @@
 import samp, unittest
 
+let x10 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+
 suite "parcentile":
-  test "normal":
+  test "1 == [1, 2, 3] 0":
     check(1 == [1, 2, 3].parcentile(0))
+  test "2 == [1, 2, 3] 50":
     check(2 == [3, 2, 1].parcentile(50))
   test "細かい値":
-    check(0.55 == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].parcentile(5))
-    check(5.5 == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].parcentile(50))
-    check(10 == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].parcentile(95))
+    check(0.55 == x10.parcentile(5))
+    check(5.5 == x10.parcentile(50))
+    check(10 == x10.parcentile(95))
     check(3 == [1, 2, 3].parcentile(100))
   test "元データ量が少ない場合":
     check(1 == [1].parcentile(0))
@@ -25,7 +28,7 @@ suite "median":
 
 suite "calc":
   test "normal":
-    discard
+    check(CalcResult(fileName: "", count: 10, min: 1.0, max: 10.0, sum: 55.0, average: 5.5, median: 5.5, parcentile: 10.0) == x10.calc(95))
 
 suite "calcInput":
   test "normal":
