@@ -21,6 +21,7 @@ options:
   -o --outfile=[f]          出力ファイルパス
   -f --fieldfilepath=[ff]   複数フィールド持つファイルと、その区切り位置指定 (ex: 1:data.csv)
   -I --ignoreheader=[n]     入力データヘッダを指定行無視する
+  -X --debug                turn on debug flag
 
 help options:
   -h --help         show this screen
@@ -145,12 +146,18 @@ proc format*(arr: openArray[CalcResult],
   result = records.join("\n")
 
 if isMainModule:
-  var L = newConsoleLogger(fmtStr = verboseFmtStr)
-  addHandler(L)
-
   let
     args = docopt(doc, version = "v1.0.0")
     files = @(args["<filepath>"])
+
+  var lvl: logging.Level
+  if parseBool($args["--debug"]):
+    lvl = lvlAll
+  else:
+    lvl = lvlInfo
+
+  var L = newConsoleLogger(lvl, fmtStr = "$datetime [$levelname]$appname:")
+  addHandler(L)
 
   debug "args:", args
 
