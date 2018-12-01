@@ -22,3 +22,19 @@ suite "median":
     check(2 == [1, 2, 3].median)
     check(2 == [3, 2, 1].median)
     check(2.5 == [3, 4, 2, 1].median)
+
+suite "calc":
+  test "normal":
+    discard
+
+suite "calcInput":
+  test "normal":
+    discard
+
+suite "processInput":
+  test "normal":
+    discard
+
+suite "format":
+  test "normal":
+    discard
