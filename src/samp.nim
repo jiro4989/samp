@@ -14,7 +14,7 @@ options:
   -s --sum                  show sum
   -a --average              show average
   -m --median               show median
-  -p --parcentile=<n>       show parcentile [default: 95]
+  -p --parcentile=<n>       show parcentile [default: 0]
   -H --header               ヘッダを出力する
   -d --indelimiter=<d>      入力の区切り文字を指定 [default: \t]
   -D --outdelimiter=<d>     出力の区切り文字を指定 [default: \t]
