@@ -110,6 +110,9 @@ proc format*(arr: openArray[CalcResult],
   # ヘッダレコードの追加
   if headerFlag:
     var header: seq[string]
+    if not noFileNameFlag and
+        arr.filterIt(it.fileName != "").len != 0:
+      header.add "filepath"
     if countFlag: header.add "count"
     if minFlag: header.add "min"
     if maxFlag: header.add "max"
@@ -122,6 +125,8 @@ proc format*(arr: openArray[CalcResult],
   # 値レコードの追加
   for v in arr:
     var record: seq[string]
+    if not noFileNameFlag:
+      record.add v.fileName
     if countFlag: record.add $(v.count)
     if minFlag: record.add $(v.min)
     if maxFlag: record.add $(v.max)
