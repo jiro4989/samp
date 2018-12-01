@@ -154,6 +154,9 @@ proc initLogger(args: Table[string, Value]) =
   var L = newConsoleLogger(lvl, fmtStr = "$datetime [$levelname]$appname:")
   addHandler(L)
 
+proc isTrueParam(args: Table[string, Value], key: string): bool =
+  result = parseBool($args[key])
+
 if isMainModule:
   let
     args = docopt(doc, version = "v1.0.0")
@@ -174,18 +177,38 @@ if isMainModule:
   debug "res:", res
 
   # オプション引数に応じて出力結果を整形
-  let outData = res.format(
-      noFileNameFlag = parseBool($args["--nofilename"]),
-      countFlag = parseBool($args["--count"]),
-      minFlag = parseBool($args["--min"]),
-      maxFlag = parseBool($args["--max"]),
-      sumFlag = parseBool($args["--sum"]),
-      averageFlag = parseBool($args["--average"]),
-      medianFlag = parseBool($args["--median"]),
-      parcentileFlag = parseInt($args["--parcentile"]) != 0,
-      parcentileNum = parseInt($args["--parcentile"]),
-      headerFlag = parseBool($args["--header"]),
-      outDelimiter = $($args["--outdelimiter"]).replace("\\t", "\t"))
+  # 特定のオプションの指定がない場合は全部trueにする
+  let outData = if args.isTrueParam("--count") or 
+      args.isTrueParam("--min") or 
+      args.isTrueParam("--max") or 
+      args.isTrueParam("--sum") or 
+      args.isTrueParam("--average") or 
+      args.isTrueParam("--median"):
+    res.format(
+        noFileNameFlag = parseBool($args["--nofilename"]),
+        countFlag = parseBool($args["--count"]),
+        minFlag = parseBool($args["--min"]),
+        maxFlag = parseBool($args["--max"]),
+        sumFlag = parseBool($args["--sum"]),
+        averageFlag = parseBool($args["--average"]),
+        medianFlag = parseBool($args["--median"]),
+        parcentileFlag = parseInt($args["--parcentile"]) != 0,
+        parcentileNum = parseInt($args["--parcentile"]),
+        headerFlag = parseBool($args["--header"]),
+        outDelimiter = $($args["--outdelimiter"]).replace("\\t", "\t"))
+   else:
+    res.format(
+        noFileNameFlag = parseBool($args["--nofilename"]),
+        countFlag = true,
+        minFlag = true,
+        maxFlag = true,
+        sumFlag = true,
+        averageFlag = true,
+        medianFlag = true,
+        parcentileFlag = parseInt($args["--parcentile"]) != 0,
+        parcentileNum = parseInt($args["--parcentile"]),
+        headerFlag = parseBool($args["--header"]),
+        outDelimiter = $($args["--outdelimiter"]).replace("\\t", "\t"))
   debug "outData:", outData
 
   # 出力先指定がなければ標準出力
