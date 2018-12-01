@@ -59,7 +59,8 @@ suite "processInput":
     check([x] == [testFile1].processInput(95))
     check([x, x] == [testFile1, testFile1].processInput(95))
   test "not existing files":
-    check([x] == [testFile1, "hogefuga"].processInput(95))
+    expect(IOError):
+      discard [testFile1, "hogefuga"].processInput(95)
 
 suite "format":
   setup:

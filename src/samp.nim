@@ -27,7 +27,7 @@ help options:
   -v --version      show version
 """
 
-import algorithm, math, docopt, strutils, logging
+import algorithm, math, docopt, strutils, logging, strformat
 
 type
   CalcResult* = object
@@ -97,8 +97,6 @@ proc processInput*(files: openArray[string], n: int): seq[CalcResult] =
         var ret = f.calcInput n
         ret.fileName = fp
         result.add ret
-      except IOError:
-        error getCurrentExceptionMsg()
       finally:
         if f != nil:
           f.close
@@ -153,7 +151,47 @@ if isMainModule:
   let
     args = docopt(doc, version = "v1.0.0")
     files = @(args["<filepath>"])
-    rets = files.processInput parseInt($args["--parcentile"])
-  
+
   debug "args:", args
-  debug rets
+
+  var res: seq[CalcResult]
+  try:
+    res = files.processInput parseInt($args["--parcentile"])
+  except IOError:
+    let
+      msg = getCurrentExceptionMsg()
+      errMsg = &"ファイル読み込みに失敗: filePath={files}, error={msg}"
+    error errMsg
+    quit(1)
+
+  debug "res:", res
+
+  let outData = res.format(
+      noFileNameFlag = parseBool($args["--nofilename"]),
+      countFlag = parseBool($args["--count"]),
+      minFlag = parseBool($args["--min"]),
+      maxFlag = parseBool($args["--max"]),
+      sumFlag = parseBool($args["--sum"]),
+      averageFlag = parseBool($args["--average"]),
+      medianFlag = parseBool($args["--median"]),
+      parcentileFlag = parseInt($args["--parcentile"]) != 0,
+      parcentileNum = parseInt($args["--parcentile"]),
+      headerFlag = parseBool($args["--header"]),
+      outDelimiter = $args["--outdelimiter"])
+  
+  debug "outData:", outData
+
+  let outFilePath = $args["--outfile"]
+  if outFilePath == "":
+    echo outData
+  else:
+    try:
+      let f = outFilePath.open FileMode.fmWrite
+      defer: f.close
+      f.write outData
+    except IOError:
+      let
+        msg = getCurrentExceptionMsg()
+        errMsg = &"ファイル出力に失敗: outFilePath={outFilePath}, error={msg}"
+      error errMsg
+      quit(2)
