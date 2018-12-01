@@ -6,6 +6,7 @@ let
   testFile1 = "tests/1_100.txt"
   testFile2 = "tests/1_100_illegal.txt"
   testFile3 = "tests/1_100_header.txt"
+  csvFile1 = "tests/1_100.csv"
 
 suite "calc":
   test "normal":
@@ -44,6 +45,15 @@ suite "processInput":
   test "not existing files":
     expect(IOError):
       discard [testFile1, "hogefuga"].processInput(95)
+
+suite "processFieldFilePath":
+  setup:
+    let x1 = CalcResult(fileName: csvFile1, count: 100, min: 1.0, max: 100.0, sum: 5050.0, average: 50.5, median: 50.5, parcentile: 95.95)
+    let x2 = CalcResult(fileName: csvFile1, count: 99, min: 2.0, max: 100.0, sum: 5049.0, average: 51.0, median: 51.0, parcentile: 96.0)
+  test "normal":
+    check([x1] == [FieldFilePath(fieldIndex: 2, filePath: csvFile1)].processFieldFilePath(",", 95))
+  test "ignore 1 header":
+    check([x2] == [FieldFilePath(fieldIndex: 2, filePath: csvFile1)].processFieldFilePath(",", 95, ignoreHeaderCount = 1))
 
 suite "format":
   setup:

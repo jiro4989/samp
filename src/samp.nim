@@ -20,7 +20,7 @@ options:
   -D --outdelimiter=<d>     出力の区切り文字を指定 [default: \t]
   -o --outfile=<f>          出力ファイルパス
   -f --fieldfilepath=<ff>   複数フィールド持つファイルと、その区切り位置指定 (ex: 1:data.csv)
-  -I --ignoreheader=<n>     入力データヘッダを指定行無視する
+  -I --ignoreheader=<n>     入力データヘッダを指定行無視する [default: 0]
   -X --debug                turn on debug flag
 
 help options:
@@ -47,7 +47,7 @@ proc readLines(input: File): seq[string] =
     line: string
   while input.readLine line:
     result.add line
-
+ 
 proc calc*(x: openArray[float], parcentileNum: int): CalcResult =
   ## calc は件数、最小値、最大値、合計値、平均値、中央値、パーセンタイル値を計算する
   result = CalcResult(count: x.len, min: x.min, max: x.max, sum: x.sum, average: x.sum / x.len.toFloat, median: x.median, parcentile: x.parcentile(parcentileNum))
@@ -61,16 +61,16 @@ proc calcInput*(input: File, parcentileNum: int, ignoreHeaderCount: int = 0): Ca
       .mapIt(it.parseFloat)
       .calc(parcentileNum)
 
-proc processInput*(files: openArray[string], n: int): seq[CalcResult] =
+proc processInput*(files: openArray[string], parcentileNum: int, ignoreHeaderCount: int = 0): seq[CalcResult] =
   ## processInput はファイルがあればファイルを処理、なければ標準入力を処理
   if files.len < 1:
-    result.add stdin.calcInput n
+    result.add stdin.calcInput(parcentileNum, ignoreHeaderCount=ignoreHeaderCount)
     return
   for fp in files:
     var f: File
     try:
       f = fp.open FileMode.fmRead
-      var ret = f.calcInput n
+      var ret = f.calcInput(parcentileNum, ignoreHeaderCount=ignoreHeaderCount)
       ret.fileName = fp
       result.add ret
     finally:
@@ -178,18 +178,20 @@ proc validDefaultParamAndFormat(res: seq[CalcResult], args: Table[string, Value]
         headerFlag = parseBool($args["--header"]),
         outDelimiter = $($args["--outdelimiter"]).replace("\\t", "\t"))
 
-proc processFieldFilePath(ps: seq[FieldFilePath], inDelimiter: string, parcentileNum: int): seq[CalcResult] =
+proc processFieldFilePath*(ps: openArray[FieldFilePath], inDelimiter: string, parcentileNum: int, ignoreHeaderCount: int = 0): seq[CalcResult] =
   for v in ps:
     let i = v.fieldIndex
     var f: File
     try:
       f = v.filePath.open FileMode.fmRead
-      result.add f.readLines
+      let lines = f.readLines
+      var res = lines[ignoreHeaderCount..lines.len - 1]
+          .filterIt(i < it.split(inDelimiter).len)
           .mapIt(it.split(inDelimiter)[i-1])
           .mapIt(it.parseFloat)
           .calc(parcentileNum)
-    except IndexError:
-      warn getCurrentExceptionMsg()
+      res.fileName = v.filePath
+      result.add res
     finally:
       if f != nil:
         f.close
@@ -218,7 +220,7 @@ if isMainModule:
       quit 1
   else:
     try:
-      res = files.processInput parseInt($args["--parcentile"])
+      res = files.processInput(parseInt($args["--parcentile"]), parseInt($args["--ignoreheader"]))
     except IOError:
       let
         msg = getCurrentExceptionMsg()
