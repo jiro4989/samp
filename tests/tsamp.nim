@@ -1,4 +1,4 @@
-import samp, unittest
+import unittest, samp, fieldfilepath
 
 let
   zeroArray: seq[float] = @[]

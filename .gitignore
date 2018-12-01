@@ -3,3 +3,5 @@
 tsamp
 
 tests/tsmath
+
+tests/tfieldfilepath

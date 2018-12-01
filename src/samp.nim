@@ -29,7 +29,7 @@ help options:
 """
 
 import algorithm, math, docopt, strutils, logging, strformat, sequtils, nre
-import smath, sutil
+import smath, sutil, fieldfilepath
 
 type
   CalcResult* = object
@@ -114,19 +114,6 @@ proc format*(arr: openArray[CalcResult],
 
   result = records.join("\n")
 
-type
-  FieldFilePath* = object
-    fieldIndex*: int
-    filePath*: string
-
-proc parseFieldFilePath*(s: string): FieldFilePath = 
-  let
-    arr = s.split(":")
-    fi = arr[0].strip.parseInt
-    fp = arr[1].strip
-  debug "fieldIndex:", fi, ", filePath:", fp
-  result = FieldFilePath(fieldIndex: fi, filePath: fp)
-
 proc initLogger(args: Table[string, Value]) =
   var lvl: logging.Level
   if parseBool($args["--debug"]):
@@ -202,7 +189,7 @@ if isMainModule:
   # --filedfilepath指定があった場合は、<fielpath>...指定があったとしても、--fieldfilepathを優先
   var res: seq[CalcResult]
   if 0 < fieldFilePaths.len:
-    let ffps = fieldFilePaths.mapIt(it.parseFieldFilePath)
+    let ffps = fieldFilePaths.mapIt(it.parse)
     debug "ffps:", ffps
     try:
       res = ffps.processFieldFilePath($args["--indelimiter"], parseInt($args["--parcentile"]))
