@@ -28,7 +28,7 @@ help options:
   -v --version      show version
 """
 
-import algorithm, math, docopt, strutils, logging, strformat, sequtils
+import algorithm, math, docopt, strutils, logging, strformat, sequtils, nre
 import smath
 
 type
@@ -42,22 +42,24 @@ type
     median*: float
     parcentile*: float
 
+proc readLines(input: File): seq[string] =
+  var 
+    line: string
+  while input.readLine line:
+    result.add line
+
 proc calc*(x: openArray[float], parcentileNum: int): CalcResult =
   ## calc は件数、最小値、最大値、合計値、平均値、中央値、パーセンタイル値を計算する
   result = CalcResult(count: x.len, min: x.min, max: x.max, sum: x.sum, average: x.sum / x.len.toFloat, median: x.median, parcentile: x.parcentile(parcentileNum))
 
-proc calcInput*(input: File, parcentileNum: int): CalcResult =
+proc calcInput*(input: File, parcentileNum: int, ignoreHeaderCount: int = 0): CalcResult =
   ## calcInput はファイル、あるいは標準入力を計算して返す
   ## 不正なデータが混じっていた場合は warn を出力するが処理自体は継続する
-  var
-    values: seq[float] = @[]
-    line = ""
-  while input.readLine line:
-    try:
-      values.add(line.parseFloat)
-    except ValueError:
-      warn getCurrentExceptionMsg()
-  result = values.calc parcentileNum
+  let lines = input.readLines
+  result = lines[ignoreHeaderCount..lines.len - 1]
+      .filterIt(it.contains(re"^-?[\d\.]+$"))
+      .mapIt(it.parseFloat)
+      .calc(parcentileNum)
 
 proc processInput*(files: openArray[string], n: int): seq[CalcResult] =
   ## processInput はファイルがあればファイルを処理、なければ標準入力を処理
@@ -175,12 +177,6 @@ proc validDefaultParamAndFormat(res: seq[CalcResult], args: Table[string, Value]
         parcentileNum = parseInt($args["--parcentile"]),
         headerFlag = parseBool($args["--header"]),
         outDelimiter = $($args["--outdelimiter"]).replace("\\t", "\t"))
-
-proc readLines(input: File): seq[string] =
-  var 
-    line: string
-  while input.readLine line:
-    result.add line
 
 proc processFieldFilePath(ps: seq[FieldFilePath], inDelimiter: string, parcentileNum: int): seq[CalcResult] =
   for v in ps:
