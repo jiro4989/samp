@@ -29,7 +29,7 @@ help options:
 """
 
 import algorithm, math, docopt, strutils, logging, strformat, sequtils, nre
-import smath
+import smath, sutil
 
 type
   CalcResult* = object
@@ -42,12 +42,6 @@ type
     median*: float
     parcentile*: float
 
-proc readLines(input: File): seq[string] =
-  var 
-    line: string
-  while input.readLine line:
-    result.add line
- 
 proc calc*(x: openArray[float], parcentileNum: int): CalcResult =
   ## calc は件数、最小値、最大値、合計値、平均値、中央値、パーセンタイル値を計算する
   result = CalcResult(count: x.len, min: x.min, max: x.max, sum: x.sum, average: x.sum / x.len.toFloat, median: x.median, parcentile: x.parcentile(parcentileNum))
