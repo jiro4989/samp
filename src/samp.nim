@@ -28,7 +28,7 @@ help options:
   -v --version      show version
 """
 
-import algorithm, math, docopt, strutils, logging, strformat
+import algorithm, math, docopt, strutils, logging, strformat, sequtils
 
 type
   CalcResult* = object
@@ -118,7 +118,6 @@ proc format*(arr: openArray[CalcResult],
   ## format はオプション引数に応じた出力に加工して返す
   var
     records: seq[string]
-    record: seq[string]
   
   # ヘッダレコードの追加
   if headerFlag:
@@ -134,6 +133,7 @@ proc format*(arr: openArray[CalcResult],
 
   # 値レコードの追加
   for v in arr:
+    var record: seq[string]
     if countFlag: record.add $(v.count)
     if minFlag: record.add $(v.min)
     if maxFlag: record.add $(v.max)
@@ -144,6 +144,19 @@ proc format*(arr: openArray[CalcResult],
     records.add record.join(outDelimiter)
 
   result = records.join("\n")
+
+type
+  FieldFilePath* = object
+    fieldIndex*: int
+    filePath*: string
+
+proc parseFieldFilePath*(s: string): FieldFilePath = 
+  let
+    arr = s.split(":")
+    fi = arr[0].strip.parseInt
+    fp = arr[1].strip
+  debug "fieldIndex:", fi, ", filePath:", fp
+  result = FieldFilePath(fieldIndex: fi, filePath: fp)
 
 proc initLogger(args: Table[string, Value]) =
   var lvl: logging.Level
@@ -190,23 +203,59 @@ proc validDefaultParamAndFormat(res: seq[CalcResult], args: Table[string, Value]
         headerFlag = parseBool($args["--header"]),
         outDelimiter = $($args["--outdelimiter"]).replace("\\t", "\t"))
 
+proc readLines(input: File): seq[string] =
+  var 
+    line: string
+  while input.readLine line:
+    result.add line
+
+proc processFieldFilePath(ps: seq[FieldFilePath], inDelimiter: string, parcentileNum: int): seq[CalcResult] =
+  for v in ps:
+    let i = v.fieldIndex
+    var f: File
+    try:
+      f = v.filePath.open FileMode.fmRead
+      result.add f.readLines
+          .mapIt(it.split(inDelimiter)[i-1])
+          .mapIt(it.parseFloat)
+          .calc(parcentileNum)
+    except IndexError:
+      warn getCurrentExceptionMsg()
+    finally:
+      if f != nil:
+        f.close
+
 if isMainModule:
   let
     args = docopt(doc, version = "v1.0.0")
     files = @(args["<filepath>"])
+    fieldFilePaths = @(args["--fieldfilepath"])
   initLogger args
   debug "args:", args
 
   # 引数を解析して計算結果を取得
+  # --filedfilepath指定があった場合は、<fielpath>...指定があったとしても、--fieldfilepathを優先
   var res: seq[CalcResult]
-  try:
-    res = files.processInput parseInt($args["--parcentile"])
-  except IOError:
-    let
-      msg = getCurrentExceptionMsg()
-      errMsg = &"ファイル読み込みに失敗: filePath={files}, error={msg}"
-    error errMsg
-    quit 1
+  if 0 < fieldFilePaths.len:
+    let ffps = fieldFilePaths.mapIt(it.parseFieldFilePath)
+    debug "ffps:", ffps
+    try:
+      res = ffps.processFieldFilePath($args["--indelimiter"], parseInt($args["--parcentile"]))
+    except:
+      let
+        msg = getCurrentExceptionMsg()
+        errMsg = &"何らかのエラー: filedFilePaths={ffps}, error={msg}"
+      error errMsg
+      quit 1
+  else:
+    try:
+      res = files.processInput parseInt($args["--parcentile"])
+    except IOError:
+      let
+        msg = getCurrentExceptionMsg()
+        errMsg = &"ファイル読み込みに失敗: filePath={files}, error={msg}"
+      error errMsg
+      quit 1
   debug "res:", res
 
   # オプション引数に応じて出力結果を整形
