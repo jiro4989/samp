@@ -28,7 +28,7 @@ help options:
   -v --version      show version
 """
 
-import algorithm, math, docopt, strutils, logging, strformat, sequtils, nre
+import math, docopt, strutils, logging, strformat, sequtils, nre
 import smath, sutil, fieldfilepath
 
 type
