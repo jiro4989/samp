@@ -40,6 +40,7 @@ suite "calcInput":
     let f2 = testFile2.open FileMode.fmRead
   teardown:
     f.close
+    f2.close
   test "args is stdin":
     # TODO
     discard
