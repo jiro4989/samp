@@ -125,7 +125,7 @@ proc format*(arr: openArray[CalcResult],
   # 値レコードの追加
   for v in arr:
     var record: seq[string]
-    if not noFileNameFlag:
+    if not noFileNameFlag and v.fileName != "":
       record.add v.fileName
     if countFlag: record.add $(v.count)
     if minFlag: record.add $(v.min)
