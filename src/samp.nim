@@ -17,21 +17,17 @@ options:
   -v --version      show version
 """
 
-import algorithm, math, docopt
+import algorithm, math, docopt, strutils, os
 
-if isMainModule:
-  let args = docopt(doc, version = "v1.0.0")
-  let files = args["<filepath>"]
-  if files.len < 1:
-    # 標準入力を対象に処理
-    var line = ""
-    var lines: seq[string] = @[]
-    while stdin.readLine line:
-      lines.add line
-    echo lines
-  else:
-    # ファイルを対象に処理
-    echo "file"
+type CalcResult = object
+  fileName: string
+  count: int
+  min: float
+  max: float
+  sum: float
+  average: float
+  median: float
+  parcentile: float
 
 proc parcentile*[T](x: openArray[T], m: int): float =
   let v = x.sorted(cmp)
@@ -55,3 +51,31 @@ proc parcentile*[T](x: openArray[T], m: int): float =
 
 proc median*[T](x: openArray[T]): float =
   result = x.parcentile(50)
+  
+proc calc*(x: openArray[float]): CalcResult =
+  result = CalcResult(count: x.len, min: x.min, max: x.max, sum: x.sum, average: x.sum / x.len.toFloat, median: x.median, parcentile: x.parcentile(95))
+
+if isMainModule:
+  let args = docopt(doc, version = "v1.0.0")
+  let files = args["<filepath>"]
+  var rets: seq[CalcResult] = @[]
+  if files.len < 1:
+    var values: seq[float] = @[]
+    # 標準入力を対象に処理
+    var line = ""
+    while stdin.readLine line:
+      values.add(line.parseFloat)
+    rets.add values.calc
+  else:
+    # ファイルを対象に処理
+    for fp in files:
+      var values: seq[float] = @[]
+      let f = fp.open FileMode.fmRead
+      var line = ""
+      while f.readLine line:
+        values.add(line.parseFloat)
+      f.close
+      var ret = values.calc
+      ret.fileName = fp
+      rets.add ret
+  echo rets
