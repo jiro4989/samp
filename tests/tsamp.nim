@@ -5,6 +5,7 @@ let
   x10 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
   testFile1 = "tests/1_100.txt"
   testFile2 = "tests/1_100_illegal.txt"
+  testFile3 = "tests/1_100_header.txt"
 
 suite "calc":
   test "normal":
@@ -14,16 +15,22 @@ suite "calcInput":
   setup:
     let f = testFile1.open FileMode.fmRead
     let f2 = testFile2.open FileMode.fmRead
+    let f3 = testFile3.open FileMode.fmRead
   teardown:
     f.close
     f2.close
+    f3.close
   test "args is stdin":
     # TODO
     discard
   test "args is file":
     check(CalcResult(count: 100, min: 1.0, max: 100.0, sum: 5050.0, average: 50.5, median: 50.5, parcentile: 95.95) == f.calcInput(95))
+  test "ignore 1 header":
+    check(CalcResult(count: 99, min: 2.0, max: 100.0, sum: 5049.0, average: 51.0, median: 51.0, parcentile: 96.0) == f.calcInput(95, ignoreHeaderCount=1))
   test "if data file has illegal value then handle error (no panic)":
     check(CalcResult(count: 100, min: 1.0, max: 100.0, sum: 5050.0, average: 50.5, median: 50.5, parcentile: 95.95) == f2.calcInput(95))
+  test "ignore 2 header":
+    check(CalcResult(count: 99, min: 2.0, max: 100.0, sum: 5049.0, average: 51.0, median: 51.0, parcentile: 96.0) == f3.calcInput(95, ignoreHeaderCount=2))
 
 suite "processInput":
   setup:
