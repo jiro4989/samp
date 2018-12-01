@@ -41,6 +41,9 @@ type CalcResult* = object
 
 proc parcentile*[T](x: openArray[T], m: int): float =
   ## parcentile はパーセンタイル値を計算して返す
+  if x.len <= 0:
+    result = 0.0
+    return
   let v = x.sorted(cmp)
   if m <= 0:
     result = v[0].float
