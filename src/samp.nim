@@ -68,7 +68,8 @@ proc calc*(x: openArray[float]): CalcResult =
   ## calc は件数、最小値、最大値、合計値、平均値、中央値、パーセンタイル値を計算する
   result = CalcResult(count: x.len, min: x.min, max: x.max, sum: x.sum, average: x.sum / x.len.toFloat, median: x.median, parcentile: x.parcentile(95))
 
-proc processInput*(input: File): CalcResult =
+proc calcInput*(input: File): CalcResult =
+  ## calcInput はファイル、あるいは標準入力を計算して返す
   var
     values: seq[float] = @[]
     line = ""
@@ -76,6 +77,10 @@ proc processInput*(input: File): CalcResult =
     values.add(line.parseFloat)
   defer: input.close
   result = values.calc
+
+proc format*(arr: openArray[CalcResult], args: Table[string, Value]): seq[string] =
+  ## format はオプション引数に応じた出力に加工して返す
+  result = @["test", "test"]
 
 if isMainModule:
   let
@@ -86,12 +91,12 @@ if isMainModule:
 
   # ファイルがあればファイルを処理、なければ標準入力を処理
   if files.len < 1:
-    rets.add stdin.processInput
+    rets.add stdin.calcInput
   else:
     for fp in files:
       let f = fp.open FileMode.fmRead
       # f はprocessInput内でcloseする
-      var ret = f.processInput
+      var ret = f.calcInput
       ret.fileName = fp
       rets.add ret
   echo rets
