@@ -6,30 +6,6 @@ let
   testFile1 = "tests/1_100.txt"
   testFile2 = "tests/1_100_illegal.txt"
 
-suite "parcentile":
-  test "normal":
-    check(0.55 == x10.parcentile(5))
-    check(2 == [3, 2, 1].parcentile(50))
-    check(5.5 == x10.parcentile(50))
-    check(10 == x10.parcentile(95))
-  test "a little datas":
-    check(0 == zeroArray.parcentile(0))
-    check(1 == [1].parcentile(0))
-    check(1 == [1].parcentile(50))
-    check(1 == [1].parcentile(100))
-  test "boundary":
-    check(2 == [9, 3, 2].parcentile(-1))
-    check(1 == [1, 2, 3].parcentile(0))
-    check(3 == [1, 2, 3].parcentile(100))
-    check(9 == [9, 3, 2].parcentile(101))
-    check(9 == [9, 3, 2].parcentile(65535))
-
-suite "median":
-  test "normal":
-    check(2 == [1, 2, 3].median)
-    check(2 == [3, 2, 1].median)
-    check(2.5 == [3, 4, 2, 1].median)
-
 suite "calc":
   test "normal":
     check(CalcResult(fileName: "", count: 10, min: 1.0, max: 10.0, sum: 55.0, average: 5.5, median: 5.5, parcentile: 10.0) == x10.calc(95))
