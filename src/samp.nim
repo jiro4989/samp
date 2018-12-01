@@ -7,7 +7,7 @@ usage:
   samp [options] (-f <ff>)...
 
 options:
-  -N, --nofilename          入力元ファイル名を出力しない
+  -N --nofilename          入力元ファイル名を出力しない
   -c --count                show count
   -n --min                  show minimum
   -x --max                  show maximum
