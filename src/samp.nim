@@ -58,27 +58,29 @@ proc calc*(x: openArray[float]): CalcResult =
   ## calc は件数、最小値、最大値、合計値、平均値、中央値、パーセンタイル値を計算する
   result = CalcResult(count: x.len, min: x.min, max: x.max, sum: x.sum, average: x.sum / x.len.toFloat, median: x.median, parcentile: x.parcentile(95))
 
+proc processInput*(input: File): CalcResult =
+  var
+    values: seq[float] = @[]
+    line = ""
+  while input.readLine line:
+    values.add(line.parseFloat)
+  defer: input.close
+  result = values.calc
+
 if isMainModule:
-  let args = docopt(doc, version = "v1.0.0")
-  let files = args["<filepath>"]
-  var rets: seq[CalcResult] = @[]
+  let
+    args = docopt(doc, version = "v1.0.0")
+    files = args["<filepath>"]
+  var
+    rets: seq[CalcResult] = @[]
+
+  # ファイルがアレばファイルを処理、なければ標準入力を処理
   if files.len < 1:
-    var values: seq[float] = @[]
-    # 標準入力を対象に処理
-    var line = ""
-    while stdin.readLine line:
-      values.add(line.parseFloat)
-    rets.add values.calc
+    rets.add stdin.processInput
   else:
-    # ファイルを対象に処理
     for fp in files:
-      var values: seq[float] = @[]
       let f = fp.open FileMode.fmRead
-      var line = ""
-      while f.readLine line:
-        values.add(line.parseFloat)
-      f.close
-      var ret = values.calc
+      var ret = f.processInput
       ret.fileName = fp
       rets.add ret
   echo rets
