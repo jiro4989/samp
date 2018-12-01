@@ -16,11 +16,11 @@ options:
   -m --median               show median
   -p --parcentile=<n>       show parcentile [default: 95]
   -H --header               ヘッダを出力する
-  -d --indelimiter=[d]      入力の区切り文字を指定 [default: "\t"]
-  -D --outdelimiter=[d]     出力の区切り文字を指定 [default: "\t"]
-  -o --outfile=[f]          出力ファイルパス
-  -f --fieldfilepath=[ff]   複数フィールド持つファイルと、その区切り位置指定 (ex: 1:data.csv)
-  -I --ignoreheader=[n]     入力データヘッダを指定行無視する
+  -d --indelimiter=<d>      入力の区切り文字を指定 [default: \t]
+  -D --outdelimiter=<d>     出力の区切り文字を指定 [default: \t]
+  -o --outfile=<f>          出力ファイルパス
+  -f --fieldfilepath=<ff>   複数フィールド持つファイルと、その区切り位置指定 (ex: 1:data.csv)
+  -I --ignoreheader=<n>     入力データヘッダを指定行無視する
   -X --debug                turn on debug flag
 
 help options:
@@ -169,7 +169,7 @@ if isMainModule:
       msg = getCurrentExceptionMsg()
       errMsg = &"ファイル読み込みに失敗: filePath={files}, error={msg}"
     error errMsg
-    quit(1)
+    quit 1
 
   debug "res:", res
 
@@ -184,21 +184,22 @@ if isMainModule:
       parcentileFlag = parseInt($args["--parcentile"]) != 0,
       parcentileNum = parseInt($args["--parcentile"]),
       headerFlag = parseBool($args["--header"]),
-      outDelimiter = $args["--outdelimiter"])
-  
+      outDelimiter = $($args["--outdelimiter"]).replace("\\t", "\t"))
+
   debug "outData:", outData
 
-  let outFilePath = $args["--outfile"]
-  if outFilePath == "":
+  if not args["--outfile"]:
     echo outData
-  else:
-    try:
-      let f = outFilePath.open FileMode.fmWrite
-      defer: f.close
-      f.write outData
-    except IOError:
-      let
-        msg = getCurrentExceptionMsg()
-        errMsg = &"ファイル出力に失敗: outFilePath={outFilePath}, error={msg}"
-      error errMsg
-      quit(2)
+    quit 0
+
+  let outFilePath = $args["--outfile"]
+  try:
+    let f = outFilePath.open FileMode.fmWrite
+    defer: f.close
+    f.write outData
+  except IOError:
+    let
+      msg = getCurrentExceptionMsg()
+      errMsg = &"ファイル出力に失敗: outFilePath={outFilePath}, error={msg}"
+    error errMsg
+    quit 2
