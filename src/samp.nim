@@ -85,7 +85,7 @@ proc processFieldFilePath*(ps: openArray[FieldFilePath], inDelimiter: string, pa
       f = v.filePath.open FileMode.fmRead
       let lines = f.readLines
       var res = lines[ignoreHeaderCount..lines.len - 1]
-          .filterIt(i < it.split(inDelimiter).len)
+          .filterIt(i <= it.split(inDelimiter).len)
           .mapIt(it.split(inDelimiter)[i-1])
           .mapIt(it.parseFloat)
           .calc(parcentileNum)

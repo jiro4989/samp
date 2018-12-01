@@ -57,8 +57,10 @@ suite "processFieldFilePath":
   setup:
     let x1 = CalcResult(fileName: csvFile1, count: 100, min: 1.0, max: 100.0, sum: 5050.0, average: 50.5, median: 50.5, parcentile: 95.95)
     let x2 = CalcResult(fileName: csvFile1, count: 99, min: 2.0, max: 100.0, sum: 5049.0, average: 51.0, median: 51.0, parcentile: 96.0)
+    let x3 = CalcResult(fileName: csvFile1, count: 100, min: 1.0, max: 10000.0, sum: 338350.0, average: 3383.5, median: 2550.5, parcentile: 9206.45)
   test "normal":
     check([x1] == [FieldFilePath(fieldIndex: 2, filePath: csvFile1)].processFieldFilePath(",", 95))
+    check([x3] == [FieldFilePath(fieldIndex: 3, filePath: csvFile1)].processFieldFilePath(",", 95))
   test "ignore 1 header":
     check([x2] == [FieldFilePath(fieldIndex: 2, filePath: csvFile1)].processFieldFilePath(",", 95, ignoreHeaderCount = 1))
 
