@@ -29,15 +29,15 @@ help options:
 
 import algorithm, math, docopt, strutils, logging
 
-type CalcResult = object
-  fileName: string
-  count: int
-  min: float
-  max: float
-  sum: float
-  average: float
-  median: float
-  parcentile: float
+type CalcResult* = object
+  fileName*: string
+  count*: int
+  min*: float
+  max*: float
+  sum*: float
+  average*: float
+  median*: float
+  parcentile*: float
 
 proc parcentile*[T](x: openArray[T], m: int): float =
   ## parcentile はパーセンタイル値を計算して返す
@@ -64,29 +64,29 @@ proc median*[T](x: openArray[T]): float =
   ## median は中央値を計算して返す
   result = x.parcentile(50)
   
-proc calc*(x: openArray[float]): CalcResult =
+proc calc*(x: openArray[float], n: int): CalcResult =
   ## calc は件数、最小値、最大値、合計値、平均値、中央値、パーセンタイル値を計算する
-  result = CalcResult(count: x.len, min: x.min, max: x.max, sum: x.sum, average: x.sum / x.len.toFloat, median: x.median, parcentile: x.parcentile(95))
+  result = CalcResult(count: x.len, min: x.min, max: x.max, sum: x.sum, average: x.sum / x.len.toFloat, median: x.median, parcentile: x.parcentile(n))
 
-proc calcInput*(input: File): CalcResult =
+proc calcInput*(input: File, n: int): CalcResult =
   ## calcInput はファイル、あるいは標準入力を計算して返す
   var
     values: seq[float] = @[]
     line = ""
   while input.readLine line:
     values.add(line.parseFloat)
-  result = values.calc
+  result = values.calc n
 
-proc processInput*(files: openArray[string]): seq[CalcResult] =
+proc processInput*(files: openArray[string], n: int): seq[CalcResult] =
   ## processInput はファイルがあればファイルを処理、なければ標準入力を処理
   if files.len < 1:
-    result.add stdin.calcInput
+    result.add stdin.calcInput n
   else:
     for fp in files:
       var f: File
       try:
         f = fp.open FileMode.fmRead
-        var ret = f.calcInput
+        var ret = f.calcInput n
         ret.fileName = fp
         result.add ret
       except IOError:
@@ -107,7 +107,7 @@ if isMainModule:
   let
     args = docopt(doc, version = "v1.0.0")
     files = @(args["<filepath>"])
-    rets = files.processInput
+    rets = files.processInput parseInt($args["--parcentile"])
   
   debug "args:", args
   debug rets
