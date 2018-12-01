@@ -74,12 +74,13 @@ if isMainModule:
   var
     rets: seq[CalcResult] = @[]
 
-  # ファイルがアレばファイルを処理、なければ標準入力を処理
+  # ファイルがあればファイルを処理、なければ標準入力を処理
   if files.len < 1:
     rets.add stdin.processInput
   else:
     for fp in files:
       let f = fp.open FileMode.fmRead
+      # f はprocessInput内でcloseする
       var ret = f.processInput
       ret.fileName = fp
       rets.add ret
