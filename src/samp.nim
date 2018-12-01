@@ -74,11 +74,15 @@ proc calc*(x: openArray[float], n: int): CalcResult =
 
 proc calcInput*(input: File, n: int): CalcResult =
   ## calcInput はファイル、あるいは標準入力を計算して返す
+  ## 不正なデータが混じっていた場合は warn を出力するが処理自体は継続する
   var
     values: seq[float] = @[]
     line = ""
   while input.readLine line:
-    values.add(line.parseFloat)
+    try:
+      values.add(line.parseFloat)
+    except ValueError:
+      warn getCurrentExceptionMsg()
   result = values.calc n
 
 proc processInput*(files: openArray[string], n: int): seq[CalcResult] =
@@ -98,7 +102,6 @@ proc processInput*(files: openArray[string], n: int): seq[CalcResult] =
       finally:
         if f != nil:
           f.close
-
 
 proc format*(arr: openArray[CalcResult],
              noFileNameFlag: bool = false,
