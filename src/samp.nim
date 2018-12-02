@@ -28,8 +28,16 @@ help options:
   -v --version      show version
 """
 
-import math, docopt, strutils, logging, strformat, sequtils, nre
+import math, docopt, strutils, logging, strformat, sequtils, nre, times, os
 import smath, sutil, fieldfilepath
+
+template benchmark(benchmarkName: string, code: untyped) =
+  block:
+    let t0 = epochTime()
+    code
+    let elapsed = epochTime() - t0
+    let elapsedStr = elapsed.formatFloat(format = ffDecimal, precision = 3)
+    echo "CPU Time [", benchmarkName, "] ", elapsedStr, "s"
 
 type
   CalcResult* = object
@@ -49,16 +57,20 @@ proc calc*(x: openArray[float], parcentileNum: int): CalcResult =
 proc calcInput*(input: File, parcentileNum: int, ignoreHeaderCount: int = 0): CalcResult =
   ## calcInput はファイル、あるいは標準入力を計算して返す
   ## 不正なデータが混じっていた場合は warn を出力するが処理自体は継続する
-  var n = ignoreHeaderCount
-  let lines = input.readLines
-  if n < 0:
-    n = 0
-  if lines.len - 1 < n:
-    n = lines.len - 1
-  result = lines[n..lines.len - 1]
-      .filterIt(it.contains(re"^-?[\d\.]+$"))
-      .mapIt(it.parseFloat)
-      .calc(parcentileNum)
+  benchmark "calcInput":
+    var n = ignoreHeaderCount
+    let lines = input.readLines
+    if n < 0:
+      n = 0
+    if lines.len - 1 < n:
+      n = lines.len - 1
+    var vals: seq[float]
+    for v in lines[n..lines.len - 1]:
+      try:
+        vals.add v.parseFloat
+      except ValueError:
+        warn &"不正な入力値:value={v}"
+    result = vals.calc(parcentileNum)
 
 proc processInput*(files: openArray[string], parcentileNum: int, ignoreHeaderCount: int = 0): seq[CalcResult] =
   ## processInput はファイルがあればファイルを処理、なければ標準入力を処理
@@ -212,32 +224,35 @@ if isMainModule:
   # 引数を解析して計算結果を取得
   # --filedfilepath指定があった場合は、<fielpath>...指定があったとしても、--fieldfilepathを優先
   var res: seq[CalcResult]
-  if 0 < fieldFilePaths.len:
-    let ffps = fieldFilePaths.mapIt(it.parse)
-    debug "ffps:", ffps
-    try:
-      res = ffps.processFieldFilePath($args["--indelimiter"], parseInt($args["--parcentile"]))
-    except:
-      let
-        msg = getCurrentExceptionMsg()
-        errMsg = &"何らかのエラー: filedFilePaths={ffps}, error={msg}"
-      error errMsg
-      quit 1
-  else:
-    try:
-      res = files.processInput(parseInt($args["--parcentile"]), parseInt($args["--ignoreheader"]))
-    except IOError:
-      let
-        msg = getCurrentExceptionMsg()
-        errMsg = &"ファイル読み込みに失敗: filePath={files}, error={msg}"
-      error errMsg
-      quit 1
-  debug "res:", res
+  benchmark "calc res":
+    if 0 < fieldFilePaths.len:
+      let ffps = fieldFilePaths.mapIt(it.parse)
+      debug "ffps:", ffps
+      try:
+        res = ffps.processFieldFilePath($args["--indelimiter"], parseInt($args["--parcentile"]))
+      except:
+        let
+          msg = getCurrentExceptionMsg()
+          errMsg = &"何らかのエラー: filedFilePaths={ffps}, error={msg}"
+        error errMsg
+        quit 1
+    else:
+      try:
+        res = files.processInput(parseInt($args["--parcentile"]), parseInt($args["--ignoreheader"]))
+      except IOError:
+        let
+          msg = getCurrentExceptionMsg()
+          errMsg = &"ファイル読み込みに失敗: filePath={files}, error={msg}"
+        error errMsg
+        quit 1
+    debug "res:", res
 
-  # オプション引数に応じて出力結果を整形
-  # 特定のオプションの指定がない場合は全部trueにする
-  let outData = res.validDefaultParamAndFormat(args)
-  debug "outData:", outData
+  var outData: string
+  benchmark "validDefaultParam":
+    # オプション引数に応じて出力結果を整形
+    # 特定のオプションの指定がない場合は全部trueにする
+    outData = res.validDefaultParamAndFormat(args)
+    debug "outData:", outData
 
   # 出力先指定がなければ標準出力
   # あったらファイル出力
